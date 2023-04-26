@@ -38,21 +38,23 @@ async function initWebGPU(canvas: HTMLCanvasElement) {
 }  
 
 async function initPipeline(device: GPUDevice, format: GPUTextureFormat): Promise<GPURenderPipeline> {
+  const vertexShader = device.createShaderModule({
+    code: triangleVert,
+  })
+  const fragmentShader = device.createShaderModule({
+    code: redFrag,
+  })
   const descriptor: GPURenderPipelineDescriptor = {
         layout: 'auto',
         vertex: {
-            module: device.createShaderModule({
-                code: triangleVert
-            }),
+            module: vertexShader,
             entryPoint: 'main'
         },
         primitive: {
             topology: 'triangle-list' // try point-list, line-list, line-strip, triangle-strip?
         },
         fragment: {
-            module: device.createShaderModule({
-                code: redFrag
-            }),
+            module: fragmentShader,
             entryPoint: 'main',
             targets: [
                 {
@@ -62,10 +64,32 @@ async function initPipeline(device: GPUDevice, format: GPUTextureFormat): Promis
         }
     }
     return await device.createRenderPipelineAsync(descriptor)
-  
 }
 
+// create & submit device commands
+function draw(device: GPUDevice, context: GPUCanvasContext, pipeline: GPURenderPipeline) {
+  // 获取 encoder 存储一系列的绘制工作
+  const commandEncoder = device.createCommandEncoder();
 
+  // 申请一个渲染通道
+  const renderPass = commandEncoder.beginRenderPass({
+    colorAttachments: [{
+      view: context.getCurrentTexture().createView(),
+      loadOp: 'clear',
+      clearValue: { r: 0, g: 0, b: 0, a: 1.0 },
+      storeOp: 'store'
+    }]
+  })
+
+  
+  renderPass.setPipeline(pipeline);
+  renderPass.draw(3); // 并行运行3次，会输出3个坐标
+
+  renderPass.end();
+  // 写入 encoder 完成，生成 buffer，给 GPU 处理
+  const buffer = commandEncoder.finish();
+  device.queue.submit([buffer]);
+}
 
 export async function run() {
   const canvas = document.querySelector('canvas');
@@ -79,5 +103,6 @@ export async function run() {
 
   // 获取 pipeline
   const pipeline = await initPipeline(device, format);
-  
+
+  draw(device, context, pipeline);
 }
