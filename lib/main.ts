@@ -1,5 +1,18 @@
-import triangleVert from '../src/shaders/triangle.vert.wgsl?raw';
+import positionVert from '../src/shaders/position.vert.wgsl?raw';
 import redFrag from '../src/shaders/red.frag.wgsl?raw';
+
+
+interface VertexData {
+  vertex: Float32Array,
+  vertexBuffer: GPUBuffer,
+  vertexCount: number,
+}
+
+interface ColorData {
+  color: Float32Array,
+  colorBuffer: GPUBuffer,
+  colorGroup: GPUBindGroup,
+}
 
 // 初始化 webGPU device & config canvas context
 async function initWebGPU(canvas: HTMLCanvasElement) {
@@ -35,41 +48,113 @@ async function initWebGPU(canvas: HTMLCanvasElement) {
     format,
     device,
   }
-}  
+}
 
-async function initPipeline(device: GPUDevice, format: GPUTextureFormat): Promise<GPURenderPipeline> {
+async function initPipeline(device: GPUDevice, format: GPUTextureFormat): Promise<{
+  pipeline: GPURenderPipeline,
+  vertexData: VertexData,
+  colorData: ColorData,
+}> {
+  // js cpu 内存存储
+  const vertex = new Float32Array([
+    // xyz
+    0, 0.5, 0,
+    -0.5, -0.5, 0,
+    0.5, -0.5, 0,
+  ])
+
+  const color = new Float32Array([1, 1, 0, 1]);
+
+  // 申请一个 GPU 内存
+  const vertexBuffer = device.createBuffer({
+    size: vertex.byteLength,
+    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.COPY_DST,
+  })
+
+  const colorBuffer = device.createBuffer({
+    size: color.byteLength,
+    usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+  })
+
+
+  // 将 cpu 变量写入 GPU 显存
+  device.queue.writeBuffer(vertexBuffer, 0, vertex);
+  device.queue.writeBuffer(colorBuffer, 0, color);
+
+
   const vertexShader = device.createShaderModule({
-    code: triangleVert,
+    code: positionVert,
   })
   const fragmentShader = device.createShaderModule({
     code: redFrag,
   })
   const descriptor: GPURenderPipelineDescriptor = {
-        layout: 'auto',
-        vertex: {
-            module: vertexShader,
-            entryPoint: 'main'
-        },
-        primitive: {
-            topology: 'triangle-list' // try point-list, line-list, line-strip, triangle-strip?
-        },
-        fragment: {
-            module: fragmentShader,
-            entryPoint: 'main',
-            targets: [
-                {
-                    format: format
-                }
-            ]
+    layout: 'auto',
+    vertex: {
+      module: vertexShader,
+      entryPoint: 'main',
+      buffers: [{
+        arrayStride: 3 * 4,
+        attributes: [{
+          shaderLocation: 0,
+          offset: 0,
+          format: 'float32x3'
+        }]
+      }]
+    },
+    primitive: {
+      topology: 'triangle-list' // try point-list, line-list, line-strip, triangle-strip?
+    },
+    fragment: {
+      module: fragmentShader,
+      entryPoint: 'main',
+      targets: [
+        {
+          format: format
         }
+      ]
     }
-    return await device.createRenderPipelineAsync(descriptor)
+  }
+
+  const pipeline = await device.createRenderPipelineAsync(descriptor);
+
+  const colorGroup = device.createBindGroup({
+    layout: pipeline.getBindGroupLayout(0),
+    entries: [{
+      binding: 0,
+      resource: {
+        buffer: colorBuffer,
+      }
+    }]
+  })
+
+  const vertexData = {
+    vertex,
+    vertexBuffer,
+    vertexCount: 3
+  }
+
+  const colorData = {
+    color,
+    colorBuffer,
+    colorGroup,
+  }
+
+
+
+  return {
+    pipeline,
+    vertexData,
+    colorData,
+  }
 }
 
 // create & submit device commands
-function draw(device: GPUDevice, context: GPUCanvasContext, pipeline: GPURenderPipeline) {
+function draw(device: GPUDevice, context: GPUCanvasContext, pipeline: GPURenderPipeline, vertexData: VertexData, colorData: ColorData) {
   // 获取 encoder 存储一系列的绘制工作
   const commandEncoder = device.createCommandEncoder();
+  const { vertexBuffer, vertexCount } = vertexData;
+  const { colorGroup } = colorData;
 
   // 申请一个渲染通道
   const renderPass = commandEncoder.beginRenderPass({
@@ -81,9 +166,11 @@ function draw(device: GPUDevice, context: GPUCanvasContext, pipeline: GPURenderP
     }]
   })
 
-  
+
   renderPass.setPipeline(pipeline);
-  renderPass.draw(3); // 并行运行3次，会输出3个坐标
+  renderPass.setVertexBuffer(0, vertexBuffer);
+  renderPass.setBindGroup(0, colorGroup);
+  renderPass.draw(vertexCount); // 并行运行3次，会输出3个坐标
 
   renderPass.end();
   // 写入 encoder 完成，生成 buffer，给 GPU 处理
@@ -102,7 +189,7 @@ export async function run() {
   const { context, format, device } = await initWebGPU(canvas);
 
   // 获取 pipeline
-  const pipeline = await initPipeline(device, format);
+  const { pipeline, vertexData, colorData } = await initPipeline(device, format);
 
-  draw(device, context, pipeline);
+  draw(device, context, pipeline, vertexData, colorData);
 }
