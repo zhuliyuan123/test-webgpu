@@ -28,7 +28,7 @@ function getItem(
 const items: MenuItem[] = [
     getItem('初始化', MENU_TYPE.INIT),
     getItem('画一个三角形', MENU_TYPE.DRAW_TRIANGLE),
-    getItem('进行3D渲染', MENU_TYPE.RENDERING_3D),
+    getItem('渲染立方体', MENU_TYPE.RENDER_CUBE),
 ];
 
 export default function Main() {

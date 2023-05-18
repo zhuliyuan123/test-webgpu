@@ -1,7 +1,15 @@
 import type { VertexData, ColorData } from './init-pipeline';
 
-export function draw(device: GPUDevice, context: GPUCanvasContext, pipeline: GPURenderPipeline, vertexData: VertexData, colorData: ColorData) {
+
+export interface DrawPipelineData {
+    pipeline: GPURenderPipeline;
+    vertexData: VertexData;
+    colorData: ColorData;
+}
+
+export function draw(device: GPUDevice, view: GPUTextureView, drawPipelineData: DrawPipelineData) {
     // 获取 encoder 存储一系列的绘制工作
+    const { pipeline, vertexData, colorData } = drawPipelineData;
     const commandEncoder = device.createCommandEncoder();
     const { vertexBuffer, vertexCount } = vertexData;
     const { colorGroup } = colorData;
@@ -9,7 +17,7 @@ export function draw(device: GPUDevice, context: GPUCanvasContext, pipeline: GPU
     // 申请一个渲染通道
     const renderPass = commandEncoder.beginRenderPass({
         colorAttachments: [{
-            view: context.getCurrentTexture().createView(),
+            view,
             loadOp: 'clear',
             clearValue: { r: 0, g: 0, b: 0, a: 1.0 },
             storeOp: 'store'

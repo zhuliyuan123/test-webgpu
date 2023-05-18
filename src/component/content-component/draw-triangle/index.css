@@ -1,0 +1,17 @@
+#draw-triangle {
+    position: relative;
+}
+
+#draw-triangle .color-picker-btn {
+    position: absolute;
+    display: flex;
+    top: 50px;
+    left: 100px;
+}
+
+
+#draw-triangle .slider-btn {
+    position: absolute;
+    top: 80px;
+    left: 100px;
+}
