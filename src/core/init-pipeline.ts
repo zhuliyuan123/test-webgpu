@@ -1,5 +1,3 @@
-import positionVert from '../shaders/position.vert.wgsl?raw';
-import redFrag from '../shaders/red.frag.wgsl?raw';
 export interface VertexData {
     vertexBuffer: GPUBuffer,
     vertexCount: number,
@@ -9,13 +7,19 @@ export interface ColorData {
     colorGroup: GPUBindGroup,
 }
 
+export interface ShaderCode {
+    vertexCode: string;
+    fragmentCode: string;
+}
 
-export async function initPipeline(device: GPUDevice, format: GPUTextureFormat): Promise<GPURenderPipeline> {
+
+export async function initPipeline(device: GPUDevice, format: GPUTextureFormat, shaderCode: ShaderCode): Promise<GPURenderPipeline> {
+    const { vertexCode, fragmentCode } = shaderCode;
     const descriptor: GPURenderPipelineDescriptor = {
         layout: 'auto',
         vertex: {
             module: device.createShaderModule({
-                code: positionVert,
+                code: vertexCode,
             }),
             entryPoint: 'main',
             buffers: [{
@@ -28,11 +32,12 @@ export async function initPipeline(device: GPUDevice, format: GPUTextureFormat):
             }]
         },
         primitive: {
-            topology: 'triangle-list' // try point-list, line-list, line-strip, triangle-strip?
+            topology: 'triangle-list', // try point-list, line-list, line-strip, triangle-strip?
+            cullMode: 'back',
         },
         fragment: {
             module: device.createShaderModule({
-                code: redFrag,
+                code: fragmentCode,
             }),
             entryPoint: 'main',
             targets: [

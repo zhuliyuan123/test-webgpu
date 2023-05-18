@@ -1,9 +1,11 @@
 import { initWebGPU } from '@core/init-web-gpu';
 import { initPipeline } from '@core/init-pipeline';
-import { RGB } from '@core/constant/color';
+import type { RGB } from '@core/constant/color';
 import { draw } from '@core/draw';
 import { RED_RGBA } from '@core/constant/color';
 import { changeVertex, vertexCount } from '@core/constant/triangle-vertex';
+import positionVert from '@/shaders/position.vert.wgsl?raw';
+import redFrag from '@/shaders/red.frag.wgsl?raw';
 
 
 
@@ -26,7 +28,10 @@ export class DrawTriangleService {
             g: RED_RGBA.g,
             b: RED_RGBA.b,
         });
-        this.pipeline = await initPipeline(device, format);
+        this.pipeline = await initPipeline(device, format, {
+            vertexCode: positionVert,
+            fragmentCode: redFrag,
+        });
         this.setColorGroup();
         this.draw();
     }
