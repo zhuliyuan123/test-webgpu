@@ -3,7 +3,10 @@
     "target": "ESNext",
     "useDefineForClassFields": true,
     "module": "ESNext",
-    "lib": ["ESNext", "DOM"],
+    "lib": [
+      "ESNext",
+      "DOM"
+    ],
     "moduleResolution": "Node",
     "strict": true,
     "sourceMap": true,
@@ -15,7 +18,14 @@
     "noUnusedParameters": true,
     "noImplicitReturns": true,
     "skipLibCheck": true,
-    "types": ["vite/client", "@webgpu/types"]
+    "jsx": "react",
+    "allowJs": true,
+    "types": [
+      "vite/client",
+      "@webgpu/types"
+    ]
   },
-  "include": ["src"]
+  "include": [
+    "src"
+  ]
 }
