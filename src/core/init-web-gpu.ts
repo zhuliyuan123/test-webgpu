@@ -32,6 +32,10 @@ export async function initWebGPU(canvas: HTMLCanvasElement): Promise<IInitWebGPU
     // https://developer.mozilla.org/zh-CN/docs/Web/API/GPU/getPreferredCanvasFormat
     const format = navigator.gpu.getPreferredCanvasFormat();
 
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    canvas.width = canvas.clientWidth * devicePixelRatio;
+    canvas.height = canvas.clientHeight * devicePixelRatio;
+
     const size = {
         width: canvas.width,
         height: canvas.height,
