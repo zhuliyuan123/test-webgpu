@@ -53,7 +53,7 @@ export class DrawTriangleService {
                 vertexBuffer: this.vertexBuffer,
                 vertexCount,
             },
-            colorData: {
+            groupData: {
                 groupArr: [this.bindGroup],
             }
         });

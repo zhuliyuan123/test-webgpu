@@ -6,6 +6,7 @@ import DrawTriangle from './content-component/draw-triangle';
 import RenderCube from './content-component/render-cube';
 import MultiObjectBuffer from './content-component/multi-object/buffers';
 import MultiObjectBufferWithOffset from './content-component/multi-object/buffers-with-offset';
+import MultiObjectDynamicOffset from './content-component/multi-object/dynamic-offset';
 
 interface IContentProps {
     menuId: string;
@@ -20,6 +21,7 @@ export default function ShowerContent(props: IContentProps) {
             {menuId === MENU_TYPE.RENDER_CUBE ? <RenderCube></RenderCube> : null}
             {menuId === MENU_TYPE.MULTI_OBJECTS_BUFFERS ? <MultiObjectBuffer></MultiObjectBuffer> : null}
             {menuId === MENU_TYPE.MULTI_OBJECTS_BUFFERS_WITH_OFFSET ? <MultiObjectBufferWithOffset /> : null}
+            {menuId === MENU_TYPE.MULTI_OBJECTS_DYNAMIC_OFFSET ? <MultiObjectDynamicOffset /> : null}
         </div>
     )
 }

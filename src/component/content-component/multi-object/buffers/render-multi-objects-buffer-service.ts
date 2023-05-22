@@ -55,7 +55,7 @@ export class RenderMultiObjectBufferService {
                 vertexBuffer: this.vertexBuffer,
                 vertexCount,
             },
-            colorData: {
+            groupData: {
                 groupArr: this.bindGroupArr,
             }
         });

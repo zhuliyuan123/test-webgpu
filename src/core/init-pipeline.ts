@@ -5,6 +5,7 @@ export interface VertexData {
 
 export interface GroupData {
     groupArr: GPUBindGroup[],
+    offsetNumber?: number;
 }
 
 export interface ShaderCode {
@@ -13,10 +14,10 @@ export interface ShaderCode {
 }
 
 
-export async function initPipeline(device: GPUDevice, format: GPUTextureFormat, shaderCode: ShaderCode): Promise<GPURenderPipeline> {
+export async function initPipeline(device: GPUDevice, format: GPUTextureFormat, shaderCode: ShaderCode, layout?: GPUPipelineLayout): Promise<GPURenderPipeline> {
     const { vertexCode, fragmentCode } = shaderCode;
     const descriptor: GPURenderPipelineDescriptor = {
-        layout: 'auto',
+        layout: layout ?? 'auto',
         vertex: {
             module: device.createShaderModule({
                 code: vertexCode,

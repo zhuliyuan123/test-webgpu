@@ -55,7 +55,7 @@ export class RenderCubeService {
                 vertexBuffer: this.vertexBuffer,
                 vertexCount,
             },
-            colorData: {
+            groupData: {
                 groupArr: [this.bindGroup],
             }
         });

@@ -9,23 +9,39 @@ import { vertex, vertexCount } from '@core/constant/cube-vertex';
 
 const CUBE_NUMBER: number = 50000;
 
-export class RenderMultiObjectBufferWithOffsetService {
+export class MultiObjectDynamicWithOffsetService {
     private device!: GPUDevice;
     private context!: GPUCanvasContext;
     private vertexBuffer!: GPUBuffer;
     private mvpMatrixArr!: GPUBuffer;
-    private bindGroupArr: GPUBindGroup[] = [];
+    private bindGroup!: GPUBindGroup;
     private positionArr: { x: number, y: number, z: number }[] = [];
     private pipeline!: GPURenderPipeline;
+    private dynamicBindGroupLayout!: GPUBindGroupLayout;
 
     public async init(canvas: HTMLCanvasElement) {
         const { context, format, device, size } = await initWebGPU(canvas);
         this.context = context;
         this.device = device;
+        this.dynamicBindGroupLayout = device.createBindGroupLayout({
+            entries: [
+                {
+                    binding: 0,
+                    visibility: GPUShaderStage.VERTEX,
+                    buffer: {
+                        type: 'uniform',
+                        hasDynamicOffset: true,
+                        minBindingSize: 0
+                    }
+                }
+            ]
+        })
         this.pipeline = await initPipeline(device, format, {
             vertexCode: vertCode,
             fragmentCode: fragCode,
-        });
+        }, device.createPipelineLayout({
+            bindGroupLayouts: [this.dynamicBindGroupLayout]
+        }));
         this.setVertexBuffer();
         const rotation = { x: 0, y: 0, z: 0 }
         this.setMvpMatrix(size.width / size.height, rotation, true);
@@ -56,7 +72,8 @@ export class RenderMultiObjectBufferWithOffsetService {
                 vertexCount,
             },
             groupData: {
-                groupArr: this.bindGroupArr,
+                groupArr: [this.bindGroup],
+                offsetNumber: CUBE_NUMBER,
             }
         });
     }
@@ -95,18 +112,15 @@ export class RenderMultiObjectBufferWithOffsetService {
     }
 
     private toBindGroup() {
-        for (let i = 0; i < CUBE_NUMBER; i++) {
-            this.bindGroupArr.push(this.device.createBindGroup({
-                layout: this.pipeline.getBindGroupLayout(0),
-                entries: [{
-                    binding: 0,
-                    resource: {
-                        buffer: this.mvpMatrixArr,
-                        offset: 256 * i,
-                        size: 4 * 16
-                    }
-                }]
-            }))
-        }
+        this.bindGroup = this.device.createBindGroup({
+            layout: this.dynamicBindGroupLayout,
+            entries: [{
+                binding: 0,
+                resource: {
+                    buffer: this.mvpMatrixArr,
+                    size: 4 * 16
+                }
+            }]
+        });
     }
 }
