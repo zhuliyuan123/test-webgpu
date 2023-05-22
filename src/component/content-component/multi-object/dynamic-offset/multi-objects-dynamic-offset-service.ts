@@ -7,7 +7,7 @@ import { draw } from '@core/draw';
 import { vertex, vertexCount } from '@core/constant/cube-vertex';
 
 
-const CUBE_NUMBER: number = 50000;
+const CUBE_NUMBER: number = 10000;
 
 export class MultiObjectDynamicWithOffsetService {
     private device!: GPUDevice;
