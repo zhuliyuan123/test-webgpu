@@ -45,6 +45,7 @@ export default function Main() {
                 <h3 style={{ 'textAlign': 'center' }}>webGPU练习</h3>
                 <Menu
                     defaultSelectedKeys={[menuId]}
+                    defaultOpenKeys={[MENU_TYPE.MULTI_OBJECTS]}
                     mode="inline"
                     inlineCollapsed={false}
                     items={items}

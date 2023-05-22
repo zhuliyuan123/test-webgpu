@@ -29,9 +29,8 @@ export function draw(device: GPUDevice, view: GPUTextureView, drawPipelineData: 
     renderPass.setVertexBuffer(0, vertexBuffer);
     groupArr.forEach((group) => {
         renderPass.setBindGroup(0, group);
-    })
-    renderPass.draw(vertexCount); // 并行运行3次，会输出3个坐标
-
+        renderPass.draw(vertexCount); // 并行运行3次，会输出3个坐标
+    });
     renderPass.end();
     // 写入 encoder 完成，生成 buffer，给 GPU 处理
     device.queue.submit([commandEncoder.finish()]);

@@ -1,33 +1,34 @@
 import { initWebGPU } from '@core/init-web-gpu';
 import { initPipeline } from '@core/init-pipeline';
-import cubeVert from '@/shaders/cube.vert.wgsl?raw';
-import cubeColorFrag from '@/shaders/cube.color.frag.wgsl?raw';
+import fragCode from '../shaders/frag.wgsl?raw';
+import vertCode from '../shaders/vert.wgsl?raw';
 import { getMvpMatrix } from '@core/math';
 import { draw } from '@core/draw';
 import { vertex, vertexCount } from '@core/constant/cube-vertex';
-import { RED_RGBA } from '@core/constant/color';
+
+const CUBE_NUMBER: number = 50000;
+
 
 export class RenderMultiObjectBufferService {
     private device!: GPUDevice;
     private context!: GPUCanvasContext;
     private vertexBuffer!: GPUBuffer;
-    private mvpMatrix!: GPUBuffer;
-    private bindGroup!: GPUBindGroup;
+    private mvpMatrixArr: GPUBuffer[] = [];
+    private bindGroupArr: GPUBindGroup[] = [];
+    private positionArr: { x: number, y: number, z: number }[] = [];
     private pipeline!: GPURenderPipeline;
-    private colorBuffer!: GPUBuffer;
 
     public async init(canvas: HTMLCanvasElement) {
         const { context, format, device, size } = await initWebGPU(canvas);
         this.context = context;
         this.device = device;
-        this.setVertexBuffer();
-        this.setColorBuffer();
         this.pipeline = await initPipeline(device, format, {
-            vertexCode: cubeVert,
-            fragmentCode: cubeColorFrag,
+            vertexCode: vertCode,
+            fragmentCode: fragCode,
         });
+        this.setVertexBuffer();
         const rotation = { x: 0, y: 0, z: 0 }
-        this.setMvpMatrix(size.width / size.height, rotation);
+        this.setMvpMatrix(size.width / size.height, rotation, true);
         this.toBindGroup();
         this.loop(size.width / size.height, rotation);
     }
@@ -38,8 +39,8 @@ export class RenderMultiObjectBufferService {
         z: number,
     }) {
         const now = Date.now() / 1000;
-        rotation.x = Math.sin(now);
-        rotation.y = Math.cos(now);
+        rotation.x = now;
+        rotation.y = now;
         this.setMvpMatrix(aspect, rotation);
         this.draw();
         requestAnimationFrame(() => {
@@ -55,7 +56,7 @@ export class RenderMultiObjectBufferService {
                 vertexCount,
             },
             colorData: {
-                groupArr: [this.bindGroup],
+                groupArr: this.bindGroupArr,
             }
         });
     }
@@ -69,46 +70,39 @@ export class RenderMultiObjectBufferService {
         this.device.queue.writeBuffer(this.vertexBuffer, 0, cubeVertex);
     }
 
-    private setColorBuffer() {
-        const color = new Float32Array([RED_RGBA.r, RED_RGBA.g, RED_RGBA.b, RED_RGBA.a]);
-        this.colorBuffer = this.device.createBuffer({
-            size: color.byteLength,
-            usage: GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-        })
-        this.device.queue.writeBuffer(this.colorBuffer, 0, color);
-
-    }
-
     private setMvpMatrix(aspect: number, rotation: {
         x: number,
         y: number,
         z: number,
-    }) {
-        const position = { x: 0, y: 0, z: -8 };
+    }, isCreate?: boolean) {
         const scale = { x: 1, y: 1, z: 1 };
-        if (!this.mvpMatrix) {
-            this.mvpMatrix = this.device.createBuffer({
-                size: 4 * 4 * 4,
-                usage: GPUBufferUsage.VERTEX | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
-            })
+        for (let i = 0; i < CUBE_NUMBER; i++) {
+            if (isCreate) {
+                this.mvpMatrixArr.push(this.device.createBuffer({
+                    size: 4 * 4 * 4,
+                    usage: GPUBufferUsage.VERTEX | GPUBufferUsage.UNIFORM | GPUBufferUsage.COPY_DST,
+                }))
+                this.positionArr.push({ x: Math.random() * 40 - 20, y: Math.random() * 40 - 20, z: - 50 - Math.random() * 50 })
+            }
+            this.device.queue.writeBuffer(this.mvpMatrixArr[i], 0, getMvpMatrix(aspect, this.positionArr[i], {
+                x: Math.sin(rotation.x + i),
+                y: Math.cos(rotation.y + i),
+                z: rotation.z,
+            }, scale))
         }
-        this.device.queue.writeBuffer(this.mvpMatrix, 0, getMvpMatrix(aspect, position, rotation, scale))
     }
 
     private toBindGroup() {
-        this.bindGroup = this.device.createBindGroup({
-            layout: this.pipeline.getBindGroupLayout(0),
-            entries: [{
-                binding: 0,
-                resource: {
-                    buffer: this.colorBuffer
-                }
-            }, {
-                binding: 1,
-                resource: {
-                    buffer: this.mvpMatrix,
-                }
-            }]
-        })
+        for (let i = 0; i < CUBE_NUMBER; i++) {
+            this.bindGroupArr.push(this.device.createBindGroup({
+                layout: this.pipeline.getBindGroupLayout(0),
+                entries: [{
+                    binding: 0,
+                    resource: {
+                        buffer: this.mvpMatrixArr[i],
+                    }
+                }]
+            }))
+        }
     }
 }

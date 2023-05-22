@@ -6,8 +6,8 @@ import { RenderMultiObjectBufferService } from './render-multi-objects-buffer-se
 export default function MultiObjectBuffer() {
     useEffect(() => {
         const canvasDom = document.getElementById('render-multi-objects-buffer')?.querySelector('canvas');
-        const renderCubeService = new RenderMultiObjectBufferService();
-        // renderCubeService.init(canvasDom as HTMLCanvasElement);
+        const service = new RenderMultiObjectBufferService();
+        service.init(canvasDom as HTMLCanvasElement);
     }, [])
     return (
         <div id="render-multi-objects-buffer">
