@@ -29,6 +29,12 @@ const items: MenuItem[] = [
     getItem('初始化', MENU_TYPE.INIT),
     getItem('画一个三角形', MENU_TYPE.DRAW_TRIANGLE),
     getItem('渲染立方体', MENU_TYPE.RENDER_CUBE),
+    getItem('多资源绑定', MENU_TYPE.MULTI_OBJECTS, null, [
+        getItem('创建多个 buffer', MENU_TYPE.MULTI_OBJECTS_BUFFERS),
+        getItem('buffer + offset', MENU_TYPE.MULTI_OBJECTS_BUFFERS_WITH_OFFSET),
+        getItem('动态 offset', MENU_TYPE.MULTI_OBJECTS_DYNAMIC_OFFSET),
+        getItem('实例', MENU_TYPE.MULTI_OBJECTS_INSTANCE),
+    ])
 ];
 
 export default function Main() {

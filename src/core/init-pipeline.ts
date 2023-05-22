@@ -3,8 +3,8 @@ export interface VertexData {
     vertexCount: number,
 }
 
-export interface ColorData {
-    colorGroup: GPUBindGroup,
+export interface GroupData {
+    groupArr: GPUBindGroup[],
 }
 
 export interface ShaderCode {

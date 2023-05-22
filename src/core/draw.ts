@@ -1,10 +1,10 @@
-import type { VertexData, ColorData } from './init-pipeline';
+import type { VertexData, GroupData } from './init-pipeline';
 
 
 export interface DrawPipelineData {
     pipeline: GPURenderPipeline;
     vertexData: VertexData;
-    colorData: ColorData;
+    colorData: GroupData;
 }
 
 export function draw(device: GPUDevice, view: GPUTextureView, drawPipelineData: DrawPipelineData) {
@@ -12,7 +12,7 @@ export function draw(device: GPUDevice, view: GPUTextureView, drawPipelineData: 
     const { pipeline, vertexData, colorData } = drawPipelineData;
     const commandEncoder = device.createCommandEncoder();
     const { vertexBuffer, vertexCount } = vertexData;
-    const { colorGroup } = colorData;
+    const { groupArr } = colorData;
 
     // 申请一个渲染通道
     const renderPass = commandEncoder.beginRenderPass({
@@ -27,7 +27,9 @@ export function draw(device: GPUDevice, view: GPUTextureView, drawPipelineData: 
 
     renderPass.setPipeline(pipeline);
     renderPass.setVertexBuffer(0, vertexBuffer);
-    renderPass.setBindGroup(0, colorGroup);
+    groupArr.forEach((group) => {
+        renderPass.setBindGroup(0, group);
+    })
     renderPass.draw(vertexCount); // 并行运行3次，会输出3个坐标
 
     renderPass.end();

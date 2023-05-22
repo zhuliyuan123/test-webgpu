@@ -54,8 +54,7 @@ export class DrawTriangleService {
                 vertexCount,
             },
             colorData: {
-                colorGroup: this.bindGroup,
-
+                groupArr: [this.bindGroup],
             }
         });
     }

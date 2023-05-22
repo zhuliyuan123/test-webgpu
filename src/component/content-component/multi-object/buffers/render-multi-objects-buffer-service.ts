@@ -1,14 +1,13 @@
 import { initWebGPU } from '@core/init-web-gpu';
 import { initPipeline } from '@core/init-pipeline';
-import { vertex, vertexCount } from '@core/constant/cube-vertex';
-import { draw } from '@core/draw';
-import { RED_RGBA } from '@core/constant/color';
 import cubeVert from '@/shaders/cube.vert.wgsl?raw';
 import cubeColorFrag from '@/shaders/cube.color.frag.wgsl?raw';
 import { getMvpMatrix } from '@core/math';
+import { draw } from '@core/draw';
+import { vertex, vertexCount } from '@core/constant/cube-vertex';
+import { RED_RGBA } from '@core/constant/color';
 
-
-export class RenderCubeService {
+export class RenderMultiObjectBufferService {
     private device!: GPUDevice;
     private context!: GPUCanvasContext;
     private vertexBuffer!: GPUBuffer;
@@ -111,6 +110,5 @@ export class RenderCubeService {
                 }
             }]
         })
-
     }
 }
