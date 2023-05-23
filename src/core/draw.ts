@@ -5,11 +5,12 @@ export interface DrawPipelineData {
     pipeline: GPURenderPipeline;
     vertexData: VertexData;
     groupData: GroupData;
+    instanceCount?: number;
 }
 
 export function draw(device: GPUDevice, view: GPUTextureView, drawPipelineData: DrawPipelineData) {
     // 获取 encoder 存储一系列的绘制工作
-    const { pipeline, vertexData, groupData } = drawPipelineData;
+    const { pipeline, vertexData, groupData, instanceCount } = drawPipelineData;
     const commandEncoder = device.createCommandEncoder();
     const { vertexBuffer, vertexCount } = vertexData;
     const { groupArr } = groupData;
@@ -37,7 +38,7 @@ export function draw(device: GPUDevice, view: GPUTextureView, drawPipelineData: 
             return;
         }
         renderPass.setBindGroup(0, group);
-        renderPass.draw(vertexCount); // 并行运行3次，会输出3个坐标
+        renderPass.draw(vertexCount, instanceCount ?? 1); // 并行运行3次，会输出3个坐标
     });
     renderPass.end();
     // 写入 encoder 完成，生成 buffer，给 GPU 处理

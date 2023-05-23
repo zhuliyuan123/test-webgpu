@@ -38,7 +38,7 @@ const items: MenuItem[] = [
 ];
 
 export default function Main() {
-    const [menuId, setMenuId] = useState(MENU_TYPE.MULTI_OBJECTS_DYNAMIC_OFFSET);
+    const [menuId, setMenuId] = useState(MENU_TYPE.MULTI_OBJECTS_INSTANCE);
     return (
         <div className='main'>
             <div style={{ width: 256, height: '100%' }}>
