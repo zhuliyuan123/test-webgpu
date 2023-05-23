@@ -8,6 +8,9 @@ export default function MultiObjectBuffer() {
         const canvasDom = document.getElementById('render-multi-objects-buffer')?.querySelector('canvas');
         const service = new RenderMultiObjectBufferService();
         service.init(canvasDom as HTMLCanvasElement);
+        return () => {
+            service.destroy();
+        }
     }, [])
     return (
         <div id="render-multi-objects-buffer">

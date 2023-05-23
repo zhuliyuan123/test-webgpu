@@ -7,7 +7,7 @@ import { draw } from '@core/draw';
 import { vertex, vertexCount } from '@core/constant/cube-vertex';
 
 
-const CUBE_NUMBER: number = 10000;
+const CUBE_NUMBER: number = 30000;
 
 export class RenderMultiObjectBufferWithOffsetService {
     private device!: GPUDevice;
@@ -17,6 +17,7 @@ export class RenderMultiObjectBufferWithOffsetService {
     private bindGroupArr: GPUBindGroup[] = [];
     private positionArr: { x: number, y: number, z: number }[] = [];
     private pipeline!: GPURenderPipeline;
+    private animationFrameId!: number;
 
     public async init(canvas: HTMLCanvasElement) {
         const { context, format, device, size } = await initWebGPU(canvas);
@@ -33,6 +34,11 @@ export class RenderMultiObjectBufferWithOffsetService {
         this.loop(size.width / size.height, rotation);
     }
 
+    public destroy() {
+        this.device.destroy();
+        cancelAnimationFrame(this.animationFrameId);
+    }
+
     private loop(aspect: number, rotation: {
         x: number,
         y: number,
@@ -43,7 +49,7 @@ export class RenderMultiObjectBufferWithOffsetService {
         rotation.y = now;
         this.setMvpMatrix(aspect, rotation);
         this.draw();
-        requestAnimationFrame(() => {
+        this.animationFrameId = requestAnimationFrame(() => {
             this.loop(aspect, rotation)
         })
     }

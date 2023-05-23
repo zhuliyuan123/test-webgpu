@@ -16,6 +16,7 @@ export class RenderCubeService {
     private bindGroup!: GPUBindGroup;
     private pipeline!: GPURenderPipeline;
     private colorBuffer!: GPUBuffer;
+    private animationFrameId!: number;
 
     public async init(canvas: HTMLCanvasElement) {
         const { context, format, device, size } = await initWebGPU(canvas);
@@ -33,6 +34,11 @@ export class RenderCubeService {
         this.loop(size.width / size.height, rotation);
     }
 
+    public destroy() {
+        this.device.destroy();
+        cancelAnimationFrame(this.animationFrameId);
+    }
+
     private loop(aspect: number, rotation: {
         x: number,
         y: number,
@@ -43,7 +49,7 @@ export class RenderCubeService {
         rotation.y = Math.cos(now);
         this.setMvpMatrix(aspect, rotation);
         this.draw();
-        requestAnimationFrame(() => {
+        this.animationFrameId = requestAnimationFrame(() => {
             this.loop(aspect, rotation)
         })
     }

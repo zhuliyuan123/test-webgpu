@@ -8,6 +8,9 @@ export default function MultiObjectInstance() {
         const canvasDom = document.getElementById('render-multi-objects-instance')?.querySelector('canvas');
         const service = new MultiObjectInstanceService();
         service.init(canvasDom as HTMLCanvasElement);
+        return () => {
+            service.destroy();
+        }
     }, []);
     return (
         <div id="render-multi-objects-instance" >

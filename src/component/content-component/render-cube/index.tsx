@@ -7,6 +7,9 @@ export default function RenderCube() {
         const canvasDom = document.getElementById('render-cube')?.querySelector('canvas');
         const renderCubeService = new RenderCubeService();
         renderCubeService.init(canvasDom as HTMLCanvasElement);
+        return () => {
+            renderCubeService.destroy();
+        }
     }, [])
     return (
         <div id="render-cube">

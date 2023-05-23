@@ -18,6 +18,7 @@ export class MultiObjectInstanceService {
     private positionArr: { x: number, y: number, z: number }[] = [];
     private pipeline!: GPURenderPipeline;
     private mvpBuffer: Float32Array = new Float32Array(CUBE_NUMBER * 4 * 4);
+    private animationFrameId!: number;
 
     public async init(canvas: HTMLCanvasElement) {
         const { context, format, device, size } = await initWebGPU(canvas);
@@ -34,6 +35,11 @@ export class MultiObjectInstanceService {
         this.loop(size.width / size.height, rotation);
     }
 
+    public destroy() {
+        this.device.destroy();
+        cancelAnimationFrame(this.animationFrameId);
+    }
+
     private loop(aspect: number, rotation: {
         x: number,
         y: number,
@@ -44,7 +50,7 @@ export class MultiObjectInstanceService {
         rotation.y = now;
         this.setMvpMatrix(aspect, rotation);
         this.draw();
-        requestAnimationFrame(() => {
+        this.animationFrameId = requestAnimationFrame(() => {
             this.loop(aspect, rotation)
         })
     }

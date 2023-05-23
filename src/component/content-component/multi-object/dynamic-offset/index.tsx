@@ -8,6 +8,9 @@ export default function MultiObjectDynamicOffset() {
         const canvasDom = document.getElementById('render-multi-objects-dynamic-offset')?.querySelector('canvas');
         const service = new MultiObjectDynamicWithOffsetService();
         service.init(canvasDom as HTMLCanvasElement);
+        return () => {
+            service.destroy();
+        }
     }, []);
     return (
         <div id="render-multi-objects-dynamic-offset" >

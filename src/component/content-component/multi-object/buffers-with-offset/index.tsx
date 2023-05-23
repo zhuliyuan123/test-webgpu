@@ -8,6 +8,9 @@ export default function MultiObjectBufferWithOffset() {
         const canvasDom = document.getElementById('render-multi-objects-buffer-with-offset')?.querySelector('canvas');
         const service = new RenderMultiObjectBufferWithOffsetService();
         service.init(canvasDom as HTMLCanvasElement);
+        return () => {
+            service.destroy();
+        }
     }, []);
     return (
         <div id="render-multi-objects-buffer-with-offset" >
