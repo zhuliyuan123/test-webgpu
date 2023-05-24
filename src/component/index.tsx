@@ -34,18 +34,23 @@ const items: MenuItem[] = [
         getItem('buffer + offset', MENU_TYPE.MULTI_OBJECTS_BUFFERS_WITH_OFFSET),
         getItem('动态 offset', MENU_TYPE.MULTI_OBJECTS_DYNAMIC_OFFSET),
         getItem('实例', MENU_TYPE.MULTI_OBJECTS_INSTANCE),
-    ])
+    ]),
+    getItem('贴图', MENU_TYPE.TEXTURE, null, [
+        getItem('图片贴图', MENU_TYPE.IMAGE_TEXTURE),
+        getItem('canvas 贴图', MENU_TYPE.CANVAS_TEXTURE),
+        getItem('视频贴图', MENU_TYPE.VIDEO_TEXTURE),
+    ]),
 ];
 
 export default function Main() {
-    const [menuId, setMenuId] = useState(MENU_TYPE.MULTI_OBJECTS_INSTANCE);
+    const [menuId, setMenuId] = useState(MENU_TYPE.IMAGE_TEXTURE);
     return (
         <div className='main'>
             <div style={{ width: 256, height: '100%' }}>
                 <h3 style={{ 'textAlign': 'center' }}>webGPU练习</h3>
                 <Menu
                     defaultSelectedKeys={[menuId]}
-                    defaultOpenKeys={[MENU_TYPE.MULTI_OBJECTS]}
+                    defaultOpenKeys={[MENU_TYPE.MULTI_OBJECTS, MENU_TYPE.TEXTURE]}
                     mode="inline"
                     inlineCollapsed={false}
                     items={items}
