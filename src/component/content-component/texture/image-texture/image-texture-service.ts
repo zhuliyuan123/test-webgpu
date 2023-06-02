@@ -16,6 +16,8 @@ export class ImageTextureService {
     private pipeline!: GPURenderPipeline;
     private animationFrameId!: number;
     private texture!: GPUTexture;
+    private sampler!: GPUSampler;
+    private textureGroup!: GPUBindGroup;
 
     public async init(canvas: HTMLCanvasElement) {
         const { context, format, device, size } = await initWebGPU(canvas);
@@ -25,8 +27,9 @@ export class ImageTextureService {
         this.pipeline = await this.initPipeline(format);
         const rotation = { x: 0, y: 0, z: 0 }
         this.setMvpMatrix(size.width / size.height, rotation);
-        this.toBindGroup();
         this.setTexture();
+        this.setSampler();
+        this.toBindGroup();
         this.loop(size.width / size.height, rotation);
     }
 
@@ -98,6 +101,16 @@ export class ImageTextureService {
                 }
             }]
         })
+        this.textureGroup = this.device.createBindGroup({
+            layout: this.pipeline.getBindGroupLayout(1),
+            entries: [{
+                binding: 0,
+                resource: this.sampler,
+            }, {
+                binding: 1,
+                resource: this.texture.createView(),
+            }]
+        })
     }
 
     private async initPipeline(format: GPUTextureFormat) {
@@ -156,5 +169,12 @@ export class ImageTextureService {
             { texture: this.texture },
             textureSize,
         )
+    }
+
+    private setSampler() {
+        this.sampler = this.device.createSampler({
+            magFilter: 'linear',
+            minFilter: 'linear',
+        })
     }
 }
